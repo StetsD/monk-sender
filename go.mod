@@ -3,6 +3,7 @@ module github.com/stetsd/monk-sender
 go 1.14
 
 require (
+	github.com/Shopify/sarama v1.26.4
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/golang/protobuf v1.3.2
 	github.com/gorilla/mux v1.7.4
@@ -14,7 +15,7 @@ require (
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.7.0
 	github.com/stetsd/micro-brick v0.0.0-20200602075340-52453687fc2b // indirect
-	github.com/stetsd/monk-conf v0.0.0-20200602095823-d7ecd1a04ed4
+	github.com/stetsd/monk-conf v0.0.1
 	github.com/stetsd/monk-db-driver v1.0.0
 	github.com/stetsd/monk-logger v0.0.0-20200602115304-a405b53bb9d5
 	golang.org/x/crypto v0.0.0-20200602180216-279210d13fed // indirect
