@@ -1,6 +1,8 @@
 package contracts
 
-type QueueClient interface {
-	Init()
-	Send()
+import "github.com/Shopify/sarama"
+
+type TransportClient interface {
+	InitConsumer(topic string) (sarama.PartitionConsumer, error)
+	InitProducer() (sarama.AsyncProducer, error)
 }
