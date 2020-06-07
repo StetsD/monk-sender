@@ -5,7 +5,6 @@ import (
 	"github.com/stetsd/monk-sender/internal/app/contracts"
 	"github.com/stetsd/monk-sender/internal/infrastructure"
 	"github.com/stetsd/monk-sender/internal/infrastructure/logger"
-	"log"
 	"os"
 	"os/signal"
 	"sync"
@@ -14,6 +13,7 @@ import (
 type Sender struct {
 	config          config.Config
 	transportClient contracts.TransportClient
+	channel         SenderStrategy
 }
 
 func NewApp(config config.Config) *Sender {
@@ -27,6 +27,16 @@ func (sender *Sender) Start() {
 	consumer, err := sender.transportClient.InitConsumer("on_send")
 	if err != nil {
 		panic(err)
+	}
+
+	sender.channel = &StrategySmtp{}
+	if err := sender.channel.Init(map[string]string{
+		"username": os.Getenv("SMTP_USER"),
+		"password": os.Getenv("SMTP_PASS"),
+		"host":     os.Getenv("SMTP_HOST"),
+		"port":     os.Getenv("SMTP_PORT"),
+	}); err != nil {
+		logger.Log.Fatal(err.Error())
 	}
 
 	defer func() {
@@ -46,7 +56,11 @@ func (sender *Sender) Start() {
 		for {
 			select {
 			case msg := <-consumer.Messages():
-				log.Printf("Consumed message offset %v\n", string(msg.Value))
+				received, err := onSendUnmarshaling(&msg.Value)
+				if err != nil {
+					logger.Log.Error(err.Error())
+				}
+				sender.channel.Send(received)
 			case transportErr := <-consumer.Errors():
 				logger.Log.Error(transportErr.Error())
 			case <-signals:
